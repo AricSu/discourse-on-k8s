@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgsql
+  labels:
+    app: pgsql-server
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: pgsql-server
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgsql
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pgsql-server
+  template:
+    metadata:
+      labels:
+        app: pgsql-server
+    spec:
+      containers:
+        - name: pgsql-server
+          image: postgres:13.10.1
+          ports:
+          - containerPort: 5432
+          volumeMounts:
+            - name: pgsql-storage
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: dbUsername
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: dbPassword
+            - name: POSTGRES_DB
+              value: discourse
+      volumes:
+      - name: pgsql-storage
+        persistentVolumeClaim:
+          claimName: local-storage-postgres

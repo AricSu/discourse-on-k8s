@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-server
+  labels:
+    app: web-server
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: web-server
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+      - name: web-server
+        image: jansudev/discourse-for-m1:test
+        command: ["/sbin/boot"]
+        ports:
+        - containerPort: 80
+        env:
+        - name: DISCOURSE_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: dbUsername
+        - name: DISCOURSE_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: dbPassword
+        - name: DISCOURSE_DB_HOST
+          value: pgsql
+        - name: DISCOURSE_DB_NAME
+          value: discourse
+        - name: DISCOURSE_REDIS_HOST
+          value: redis
+        - name: DISCOURSE_DEVELOPER_EMAILS
+          value: jan-su-dev@outlook.com
+        - name: DISCOURSE_HOSTNAME
+          value: forum.dbnest.net
+        - name: DISCOURSE_SMTP_FORCE_TLS
+          value: "true"
+        - name: DISCOURSE_SMTP_ADDRESS
+          value: smtp.qcloudmail.com
+        - name: DISCOURSE_SMTP_PORT
+          value: "465"
+        - name: DISCOURSE_SMTP_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: smtpUsername
+        - name: DISCOURSE_SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: smtpPassword
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 2Gi
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: discourse-storage
+          mountPath: /shared
+      volumes:
+      - name: discourse-storage
+        persistentVolumeClaim:
+          claimName: local-storage-sharedssd
