@@ -28,6 +28,7 @@ So, I made this tool or repo based on reasons above, furthermore, I know how dif
     # please replace XXX into you own values
     kubectl create secret generic secret --from-literal=dbUsername=XXX --from-literal=dbPassword='XXX' --from-literal=smtpUsername=XXX --from-literal=smtpPassword=XXX --dry-run=client -o yaml > discourse-secret.yaml
 
+    kubectl apply -f discourse-secret.yaml
     kubectl apply -f postgres.yaml
     kubectl apply -f discourse.yaml
     kubectl apply -f ingress.yaml
