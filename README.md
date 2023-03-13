@@ -10,7 +10,13 @@ It's a tool to build discourse on k8s(adapted to apple silicon system or arm chi
 
 So, I made this tool or repo based on reasons above, furthermore, I know how difficult and wasting-time it does, I wanna simplify it for everyone.
 
+Until now, The architect of my blog is the pic below. As we can see, Running discourse on macbook-M1-chip which is hardly ever been used and, now, I've finished the one.  
+
+![blog-arch](images/blog-arch.jpeg)
+
 ## Quickstart
+
+**Actually, I wanna use golang to write a yaml-generater for discourse-on-k8s**, So, later I'll update it.
 
 ## Details-demo
 
@@ -31,11 +37,12 @@ So, I made this tool or repo based on reasons above, furthermore, I know how dif
     kubectl apply -f discourse-secret.yaml
     kubectl apply -f postgres.yaml
     kubectl apply -f discourse.yaml
-    kubectl apply -f ingress.yaml
 
 
     kubectl port-forward psql 5433:5432
     pg_restore -U discourse -d discourse -p 5433 -h localhost discourse.dump -W
+
+    sudo kubectl port-forward svc/web-server 80:80
     ```
 
 ## Thanks
